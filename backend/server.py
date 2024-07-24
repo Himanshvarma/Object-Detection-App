@@ -29,7 +29,7 @@ def detect_file():
         except: 
             print('prediction unsuccessfull.')
             return jsonify({"OK" : False, "error" : "Detection unsuccessfull."}), 400
-        
+    
         outputtype = request.form.get('type')
         outputtype = int(outputtype) if outputtype is not None else 0
         classes = request.form.get('classes')
