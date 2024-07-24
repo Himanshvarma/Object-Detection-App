@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { FaCopy } from 'react-icons/fa';
 import axios from "axios";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
   const fileInputRef = useRef(null);
   const generateRef = useRef(null);
 
+  var imgUrl = useRef('');
   var imgFile = useRef(null);
   var classes = useRef('');
   var minConfidence = useRef(40);
@@ -23,7 +25,7 @@ function App() {
   useEffect(() => {
     if (inputRef.current) {
       if (!Uploadtype) {
-        inputRef.current.disabled = true;    
+        inputRef.current.disabled = true;
         inputRef.current.placeholder = '';
       }
       else {
@@ -33,6 +35,7 @@ function App() {
       inputRef.current.value = '';
     }
     imgFile.current = null;
+    imgUrl.current = '';
   }, [Uploadtype]);
 
   const handleBrowseButtonClick = () => {
@@ -47,44 +50,42 @@ function App() {
   }
 
   const generate = async () => {
-    setshowResult(true);
-    setisloading(true);
+    var iserror = false;
     if (generateRef)
       generateRef.current.disabled = true;
 
-    // if (Uploadtype) {
-    //   if (imgFile != null) {
-    //     try {
-    //       const response = await fetch(imgFile.current, {mode: 'no-cors'});
-    //       if (!response.ok) {
-    //         throw new Error('Network response was not ok');
-    //       }
-    //       const blob = await response.blob();
-    //       if (blob.type.startsWith('image/')) {
-    //         imgFile.current = blob;
-    //       } else {
-    //         throw new Error('The URL does not point to a valid image.');
-    //       }
-    //     } catch (error) {
-    //       alert('Failed to fetch the image. Please check the URL.');
-    //       console.log(error);
-    //       imgFile.current = null
-    //     }
-    //   } else {
-    //     alert('Please enter a valid image URL.');
-    //   }
-    // }
-    // else {
+    if (Uploadtype) {
+      try {
+        const response = await fetch(imgUrl.current);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const blob = await response.blob();
+        if (blob.type.startsWith('image/')) {
+          imgFile.current = blob;
+        } else {
+          throw new Error('The URL does not point to a valid image.');
+        }
+      } catch (error) {
+        alert('Failed to fetch the image. Please check the URL.');
+        console.log(error);
+        iserror = true;
+      }
+    }
+    else {
       if (!(imgFile.current && imgFile.current.type.startsWith('image/'))) {
         alert('Please upload an image file.');
-        imgFile.current = null;
+        iserror = true;
       }
-    // }
+    }
 
-    if (imgFile.current != null) {
+    if (!iserror) {
+      setshowResult(true);
+      setisloading(true);
+
       const formData = new FormData();
       formData.append('file', imgFile.current);
-      formData.append('classes', classes.current);
+      formData.append('classes', classes.current.toLowerCase());
       formData.append('confidence', minConfidence.current);
       formData.append('overlap', maxOverlap.current);
       formData.append('type', outputType);
@@ -103,7 +104,10 @@ function App() {
           throw new Error(response.data.error);
         else {
           setisloading(false);
-          setresult(`data:image/png;base64,${response.data.file}`);
+          if (outputType)
+            setresult(response.data.json);
+          else
+            setresult(`data:image/png;base64,${response.data.file}`);
         }
       } catch (error) {
         alert(error);
@@ -117,6 +121,36 @@ function App() {
     }
     if (generateRef)
       generateRef.current.disabled = false;
+
+    window.scrollTo(0, 3000)
+  }
+
+  const handleCopy = () => {
+    if (imgFile.current != null) {
+      if (outputType) {
+        navigator.clipboard.writeText(result)
+          .then(() => {
+            alert('Code copied to clipboard!');
+          })
+          .catch((err) => {
+            console.error('Failed to copy code: ', err);
+          });
+      }
+      else {
+        fetch(result)
+          .then(response => response.blob())
+          .then(blob => {
+            const item = new ClipboardItem({ [blob.type]: blob });
+            navigator.clipboard.write([item])
+              .then(() => {
+                alert('Image copied to clipboard!');
+              })
+              .catch(err => {
+                console.error('Failed to copy image: ', err);
+              });
+          });
+      }
+    }
   }
 
   return (
@@ -144,7 +178,7 @@ function App() {
           <div>
             <p className='mb-5'>{Uploadtype ? <span>Enter Image URL</span> : <span>Select File</span>}</p>
             <div className='flex'>
-              <input ref={inputRef} type='text' onChange={(event) => { imgFile.current = event.target.value; }} className={'py-2 px-3 border-[1px] border-purple-400 rounded-s-md' + (Uploadtype ? ' w-[50rem]' : ' w-[40rem]')}></input>
+              <input ref={inputRef} type='text' onChange={(event) => { imgUrl.current = event.target.value; }} className={'py-2 px-3 border-[1px] border-purple-400 rounded-s-md' + (Uploadtype ? ' w-[50rem]' : ' w-[40rem]')}></input>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className='hidden' />
               {!Uploadtype && <button onClick={handleBrowseButtonClick} className='w-40 py-2 rounded-e-md bg-violet-600 text-white hover:bg-violet-700'>Browse</button>}
             </div>
@@ -222,7 +256,7 @@ function App() {
             <div className='mt-10'>
               <div className='flex justify-between text-2xl'>
                 <div>Result</div>
-                <button className='text-purple-600 hover:text-gray-500'>copy {outputType ? <span>code</span> : <span>image</span>}</button>
+                <button className='text-purple-600 hover:text-gray-500 flex justify-between active:text-gray-500' onClick={handleCopy}><FaCopy />copy {outputType ? <span>code</span> : <span>image</span>}</button>
               </div>
               <div className='mt-10 flex justify-center'>
                 <div className='bg-white border-[1px] p-5'>

@@ -34,6 +34,7 @@ def detect_file():
         outputtype = int(outputtype) if outputtype is not None else 0
         classes = request.form.get('classes')
         classes = classes.split(',') if classes is not None else []
+        classes = [cls.strip() for cls in classes]
 
         xyxys = result[0].boxes.xyxy.cpu().numpy()
         confidences = result[0].boxes.conf.cpu().numpy()
@@ -62,7 +63,18 @@ def detect_file():
         ]
 
         if outputtype:
-            pass
+            predictions = []
+            for i in range(len(class_id)):
+                prediction = {}
+                prediction['x'] = str(xyxy[i][0])
+                prediction['y'] = str(xyxy[i][1])
+                prediction['width'] = str(xyxy[i][2])
+                prediction['height'] = str(xyxy[i][3])
+                prediction['confidence'] = str(confidence[i])
+                prediction['class'] = CLASS_NAMES_DICT[class_ids[i]]
+                prediction['class_id'] = str(class_id[i])
+                predictions.append(prediction)
+            return jsonify({"OK" : True, "message" : "Detection successfull.", "json" : {"predictions" : predictions}}), 200
         else:
             label = request.form.get('label')
             label = label if label is not None else True
