@@ -2,7 +2,7 @@ From e41525e084a6f77980665da715ec93070c397479 Mon Sep 17 00:00:00 2001
 From: Y-T-G <>
 Date: Sat, 16 Mar 2024 14:06:25 +0800
 Subject: [PATCH] Add ConcatHead
-
+     
 ---
  ultralytics/cfg/models/v8/yolov8n-2xhead.yaml | 55 ++++++++++++++++
  ultralytics/engine/trainer.py                 |  2 +-
