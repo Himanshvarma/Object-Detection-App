@@ -51,6 +51,8 @@ function App() {
 
   const generate = async () => {
     var iserror = false;
+    setshowResult(true);
+    setisloading(true);
     if (generateRef)
       generateRef.current.disabled = true;
 
@@ -80,9 +82,6 @@ function App() {
     }
 
     if (!iserror) {
-      setshowResult(true);
-      setisloading(true);
-
       const formData = new FormData();
       formData.append('file', imgFile.current);
       formData.append('classes', classes.current.toLowerCase());
@@ -128,7 +127,7 @@ function App() {
   const handleCopy = () => {
     if (imgFile.current != null) {
       if (outputType) {
-        navigator.clipboard.writeText(result)
+        navigator.clipboard.writeText(JSON.stringify(result, null, 2))
           .then(() => {
             alert('Code copied to clipboard!');
           })
