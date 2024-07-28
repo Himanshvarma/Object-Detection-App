@@ -177,7 +177,7 @@ function App() {
           <div>
             <p className='mb-5'>{Uploadtype ? <span>Enter Image URL</span> : <span>Select File</span>}</p>
             <div className='flex'>
-              <input ref={inputRef} type='text' onChange={(event) => { imgUrl.current = event.target.value; }} className={'py-2 px-3 border-[1px] border-purple-400 rounded-s-md' + (Uploadtype ? ' w-[50rem]' : ' w-[40rem]')}></input>
+              <input ref={inputRef} type='text' onChange={(event) => { imgUrl.current = event.target.value; }} className={'py-2 px-3 border-[1px] border-purple-400' + (Uploadtype ? ' rounded-md w-[50rem]' : ' rounded-s-md w-[40rem]')}></input>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className='hidden' />
               {!Uploadtype && <button onClick={handleBrowseButtonClick} className='w-40 py-2 rounded-e-md bg-violet-600 text-white hover:bg-violet-700'>Browse</button>}
             </div>
