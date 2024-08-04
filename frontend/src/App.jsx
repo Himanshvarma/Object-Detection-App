@@ -15,6 +15,7 @@ function App() {
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const generateRef = useRef(null);
+  const resultRef = useRef(null);
 
   var imgUrl = useRef('');
   var imgFile = useRef(null);
@@ -38,6 +39,11 @@ function App() {
     imgUrl.current = '';
   }, [Uploadtype]);
 
+  useEffect(() => {
+    if(resultRef.current)
+      resultRef.current.scrollIntoView({behavior: 'smooth'});
+  }, [showResult])
+
   const handleBrowseButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -51,9 +57,9 @@ function App() {
 
   const generate = async () => {
     var iserror = false;
-    setshowResult(true);
     setisloading(true);
-    if (generateRef)
+    setshowResult(true);
+    if (generateRef.current)
       generateRef.current.disabled = true;
 
     if (Uploadtype) {
@@ -80,7 +86,7 @@ function App() {
         iserror = true;
       }
     }
-
+    
     if (!iserror) {
       const formData = new FormData();
       formData.append('file', imgFile.current);
@@ -118,10 +124,8 @@ function App() {
       setisloading(false);
       setshowResult(false);
     }
-    if (generateRef)
+    if (generateRef.current)
       generateRef.current.disabled = false;
-    
-    window.scrollTo(0, 3000)
   }
 
   const handleCopy = () => {
@@ -250,7 +254,7 @@ function App() {
 
         {/* result */}
         {showResult &&
-          <div className='mt-20'>
+          <div ref={resultRef} className='mt-20'>
             <div className='h-[1px] bg-purple-600'></div>
             <div className='mt-10'>
               <div className='flex justify-between text-2xl'>
